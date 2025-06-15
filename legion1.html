@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legion Hacker BR: Guardiões das Fronteiras Digitais do Brasil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@700&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --preto-abissal: #020a0d;
+            --ciano-eletrico: #00FFFF;
+            --verde-limao: #39FF14;
+            --magenta-pulsante: #FF00FF;
+            --branco-texto: rgba(220, 240, 255, 0.9);
+        }
+
+        /* --- Reset Básico e Configuração Global --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--preto-abissal);
+            color: var(--branco-texto);
+            font-family: 'Fira Code', monospace;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- Fundo Animado e Overlay --- */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.05) 1px, transparent 1px, transparent 4px),
+                repeating-linear-gradient(90deg, rgba(0, 255, 255, 0.05), rgba(0, 255, 255, 0.05) 1px, transparent 1px, transparent 4px);
+            background-size: 4px 4px;
+            z-index: -1;
+            pointer-events: none;
+            animation: scanlines 5s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100px; }
+        }
+
+
+        /* --- Efeitos de Texto e Títulos --- */
+        h1, h2, h3 {
+            font-family: 'Exo', sans-serif;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px var(--ciano-eletrico), 0 0 10px var(--ciano-eletrico), 0 0 15px var(--ciano-eletrico);
+            letter-spacing: 2px;
+        }
+
+        .section-title {
+            color: var(--verde-limao);
+            text-shadow: 0 0 5px var(--verde-limao), 0 0 10px var(--verde-limao);
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            animation: glitch 1s linear infinite;
+            animation-play-state: paused;
+        }
+        
+        .section-title:hover {
+            animation-play-state: running;
+        }
+        
+        /* --- Animação Glitch --- */
+        @keyframes glitch {
+          2%,64% { transform: translate(2px,0) skew(0deg); }
+          4%,60% { transform: translate(-2px,0) skew(0deg); }
+          62% { transform: translate(0,0) skew(5deg); }
+        }
+        
+        .glitch {
+          animation: glitch 1s linear infinite;
+        }
+        
+        .glitch:before,
+        .glitch:after {
+          content: attr(data-text);
+          position: absolute;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: var(--preto-abissal);
+          overflow: hidden;
+        }
+        
+        .glitch:before {
+          left: 2px;
+          text-shadow: -2px 0 var(--magenta-pulsante);
+          clip: rect(44px, 450px, 56px, 0);
+          animation: glitch 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch:after {
+          left: -2px;
+          text-shadow: -2px 0 var(--ciano-eletrico), 2px 2px var(--verde-limao);
+          clip: rect(86px, 450px, 91px, 0);
+          animation: glitch 1s infinite linear alternate-reverse;
+        }
+
+        /* --- Layout e Seções --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Seção Hero --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        
+        .hero .subtitle {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--ciano-eletrico);
+            text-shadow: 0 0 5px var(--ciano-eletrico);
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero .slogan {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            color: var(--branco-texto);
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+            max-width: 600px;
+        }
+
+        #typing-cursor {
+            display: inline-block;
+            width: 12px;
+            height: 2rem;
+            background-color: var(--verde-limao);
+            animation: blink 0.7s infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* --- Seção de Missão --- */
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .mission-card {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 2rem;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .mission-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--ciano-eletrico);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .mission-card h3 {
+            color: var(--ciano-eletrico);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* --- Seção de Iniciativas --- */
+        .initiatives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .initiative-card {
+            background-color: transparent;
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .initiative-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .initiative-card:hover:before {
+            left: 100%;
+        }
+
+        .initiative-card:hover {
+            border-color: var(--verde-limao);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+        }
+        
+        .initiative-card h3 {
+            color: var(--verde-limao);
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px var(--verde-limao);
+        }
+
+        /* --- Seção de Visão --- */
+        #vision {
+            background-image: url('https://placehold.co/1920x1080/020a0d/00ffff?text=Imagem+Futurista+do+Brasil');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+        
+        #vision .overlay {
+            background: rgba(2, 10, 13, 0.8);
+            padding: 6rem 0;
+        }
+
+        #vision p {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.7;
+        }
+
+        /* --- Seção CTA --- */
+        #cta {
+            text-align: center;
+        }
+        
+        #cta h2 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            color: var(--magenta-pulsante);
+            text-shadow: 0 0 8px var(--magenta-pulsante), 0 0 15px var(--magenta-pulsante);
+        }
+        
+        #cta p {
+            max-width: 700px;
+            margin: 2rem auto;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            font-family: 'Exo', sans-serif;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: var(--preto-abissal);
+            background-color: var(--magenta-pulsante);
+            padding: 1rem 3rem;
+            border: 2px solid var(--magenta-pulsante);
+            text-transform: uppercase;
+            box-shadow: 0 0 10px var(--magenta-pulsante), 0 0 20px var(--magenta-pulsante), inset 0 0 10px rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .cta-button:hover {
+            background-color: var(--preto-abissal);
+            color: var(--magenta-pulsante);
+            animation-play-state: paused;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px var(--magenta-pulsante), 0 0 20px var(--magenta-pulsante); }
+            50% { transform: scale(1.05); box-shadow: 0 0 20px var(--magenta-pulsante), 0 0 40px var(--magenta-pulsante); }
+            100% { transform: scale(1); box-shadow: 0 0 10px var(--magenta-pulsante), 0 0 20px var(--magenta-pulsante); }
+        }
+
+        /* --- Responsividade --- */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2rem;
+            }
+            .container {
+                padding: 4rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="background-canvas"></canvas>
+
+    <!-- Seção 1: Hero Section -->
+    <header class="hero">
+        <h1 id="main-title" class="glitch" data-text="Legion Hacker BR"></h1>
+        <h2 class="subtitle fade-in">Guardiões das Fronteiras Digitais do Brasil</h2>
+        <p class="slogan fade-in">Onde código e consciência se encontram para proteger a nação.</p>
+    </header>
+
+    <main>
+        <!-- Seção 2: Visão Geral e Manifesto -->
+        <section id="manifesto" class="container fade-in">
+             <h2 class="section-title" data-text="//Nossa Diretriz Primária">//Nossa Diretriz Primária</h2>
+             <p>Em um mundo definido por dados, a soberania digital não é uma opção, é a nossa muralha. A Legion Hacker BR é a linha de frente, uma plataforma descentralizada de defesa cibernética dedicada a proteger cada cidadão brasileiro contra as ameaças invisíveis do universo digital. Somos a resposta proativa na guerra da informação.</p>
+        </section>
+
+        <!-- Seção 3: Descrição e Missão -->
+        <section id="mission" class="container fade-in">
+            <h2 class="section-title" data-text="//Protocolos de Ação">//Protocolos de Ação</h2>
+            <div class="mission-grid">
+                <div class="mission-card">
+                    <h3>PROTEGER OS VULNERÁVEIS</h3>
+                    <p>Nossa prioridade é a defesa de quem mais precisa. Criamos barreiras digitais para blindar idosos, crianças e comunidades contra fraudes, golpes e exploração.</p>
+                </div>
+                <div class="mission-card">
+                    <h3>FORTALECER A NAÇÃO</h3>
+                    <p>Elevamos o padrão da segurança digital nacional, colaborando com a infraestrutura crítica do país para construir uma defesa cibernética robusta e resiliente.</p>
+                </div>
+                <div class="mission-card">
+                    <h3>PROMOVER CONSCIÊNCIA</h3>
+                    <p>Transformamos informação em poder. Capacitamos os cidadãos com o conhecimento necessário para navegar no ambiente digital com segurança e autonomia.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Seção 4: Iniciativas-Chave -->
+        <section id="initiatives" class="container fade-in">
+            <h2 class="section-title" data-text="//Nossas Operações em Campo">//Nossas Operações em Campo</h2>
+            <div class="initiatives-grid">
+                <div class="initiative-card"><h3>Recuperação de PIX para Idosos</h3></div>
+                <div class="initiative-card"><h3>Suporte a Pequenas Empresas e Cooperativas</h3></div>
+                <div class="initiative-card"><h3>Programas Educacionais para Vulneráveis</h3></div>
+                <div class="initiative-card"><h3>Rede de Monitoramento Cibernético 24/7</h3></div>
+                <div class="initiative-card"><h3>Ativismo Digital Positivo</h3></div>
+                <div class="initiative-card"><h3>Formação de "Hackers do Bem"</h3></div>
+                <div class="initiative-card"><h3>P&D em Tecnologias de Segurança</h3></div>
+                <div class="initiative-card"><h3>Parcerias Estratégicas para Defesa</h3></div>
+            </div>
+        </section>
+        
+        <!-- Seção 5: Visão de Futuro -->
+        <section id="vision">
+            <div class="overlay">
+                <div class="container fade-in">
+                    <h2 class="section-title" data-text="//O Amanhã que Estamos Codificando">//O Amanhã que Estamos Codificando</h2>
+                    <p>Nossa visão é forjar um Brasil onde a inovação tecnológica e a segurança caminhem juntas. Aspiramos ser um bastião impenetrável de segurança digital, construído sobre a fundação da cooperação, do conhecimento aberto e da vanguarda tecnológica. Empoderar cada cidadão e blindar nossa infraestrutura digital não é nosso objetivo final, é nosso estado permanente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 6: Convite à Ação -->
+        <section id="cta" class="container fade-in">
+            <h2 data-text="A FRONTEIRA PRECISA DE VOCÊ.">A FRONTEIRA PRECISA DE VOCÊ.</h2>
+            <p>O futuro digital do Brasil está sendo escrito agora. Cada cidadão consciente, cada educador, cada hacker do bem é uma peça fundamental nesta legião. A segurança é um esforço coletivo.</p>
+            <a href="#" class="cta-button">Junte-se aos Guardiões</a>
+             <p style="margin-top: 2rem; font-size: 0.9rem; color: rgba(255,255,255,0.6);">Seja um operador, um mentor ou um apoiador. Sua habilidade é a nossa próxima linha de defesa.</p>
+        </section>
+
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Animação de Fundo com Canvas ---
+            const canvas = document.getElementById('background-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particlesArray;
+
+            // Classe da Partícula
+            class Particle {
+                constructor(x, y, directionX, directionY, size, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+                    ctx.fill();
+                }
+                update() {
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.directionX = -this.directionX;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.directionY = -this.directionY;
+                    }
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    this.draw();
+                }
+            }
+            
+            // Criação das partículas
+            function init() {
+                particlesArray = [];
+                let numberOfParticles = (canvas.height * canvas.width) / 9000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    let size = (Math.random() * 2) + 1;
+                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                    let directionX = (Math.random() * .4) - .2;
+                    let directionY = (Math.random() * .4) - .2;
+                    let color = '#00FFFF';
+                    particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                }
+            }
+
+            // Animação em loop
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                }
+                connect();
+            }
+
+            // Conexão entre partículas
+            function connect() {
+                let opacityValue = 1;
+                for (let a = 0; a < particlesArray.length; a++) {
+                    for (let b = a; b < particlesArray.length; b++) {
+                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                                       ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                        if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                            opacityValue = 1 - (distance / 20000);
+                            ctx.strokeStyle = `rgba(0, 255, 255, ${opacityValue})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+            
+            window.addEventListener('resize', () => {
+                canvas.width = innerWidth;
+                canvas.height = innerHeight;
+                init();
+            });
+
+            init();
+            animate();
+            
+            // --- Animação de Digitação ---
+            const titleElement = document.getElementById('main-title');
+            const text = "Legion Hacker BR";
+            titleElement.setAttribute('data-text', text);
+            let i = 0;
+            function typeWriter() {
+                if (i < text.length) {
+                    titleElement.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                } else {
+                   titleElement.innerHTML += '<span id="typing-cursor"></span>';
+                }
+            }
+            typeWriter();
+
+            // --- Animação de Scroll (Fade In) ---
+            const faders = document.querySelectorAll('.fade-in');
+            const appearOptions = {
+                threshold: 0.2,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    } else {
+                        entry.target.classList.add('visible');
+                        appearOnScroll.unobserve(entry.target);
+                    }
+                });
+            }, appearOptions);
+
+            faders.forEach(fader => {
+                appearOnScroll.observe(fader);
+            });
+
+        });
+    </script>
+
+</body>
+</html>

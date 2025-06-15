@@ -1,0 +1,670 @@
+// -----------------------------------------------------------------------------
+// ARQUIVO: package.json
+// Descrição: Dependências e scripts do projeto React.
+// -----------------------------------------------------------------------------
+/*
+{
+  "name": "legion-hacker-br-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.2.2",
+    "date-fns": "^2.29.3",
+    "jwt-decode": "^3.1.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.0",
+    "react-icons": "^4.7.1",
+    "react-router-dom": "^6.7.0",
+    "socket.io-client": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^3.0.0",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4",
+    "vite": "^4.0.0"
+  }
+}
+*/
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: tailwind.config.cjs
+// Descrição: Configuração do Tailwind CSS com as cores do projeto.
+// -----------------------------------------------------------------------------
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        'exo': ['Exo', 'sans-serif'],
+        'firacode': ['Fira Code', 'monospace'],
+      },
+      colors: {
+        'preto-abissal': '#020a0d',
+        'ciano-eletrico': '#00FFFF',
+        'verde-limao': '#39FF14',
+        'magenta-pulsante': '#FF00FF',
+        'branco-texto': 'rgba(220, 240, 255, 0.9)',
+      }
+    },
+  },
+  plugins: [],
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/main.jsx
+// Descrição: Ponto de entrada da aplicação React.
+// -----------------------------------------------------------------------------
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+
+import App from './App';
+import './index.css';
+import { AuthProvider } from './contexts/AuthContext';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#020a0d',
+              color: '#00FFFF',
+              border: '1px solid #00FFFF',
+            },
+          }}
+        />
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
+);
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/App.jsx
+// Descrição: Componente principal que gerencia as rotas.
+// -----------------------------------------------------------------------------
+import AppRoutes from './routes';
+
+function App() {
+  return (
+    <div className="bg-preto-abissal text-branco-texto min-h-screen font-firacode">
+      <AppRoutes />
+    </div>
+  );
+}
+
+export default App;
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/routes/index.jsx
+// Descrição: Define as rotas públicas e privadas da aplicação.
+// -----------------------------------------------------------------------------
+import { Routes, Route } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
+
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+import Dashboard from '../pages/Dashboard';
+
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route 
+        path="/dashboard" 
+        element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        } 
+      />
+    </Routes>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/routes/PrivateRoute.jsx
+// Descrição: Componente para proteger rotas que exigem autenticação.
+// -----------------------------------------------------------------------------
+import { useContext } from 'react';
+import { Navigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
+
+export default function PrivateRoute({ children }) {
+  const { signed, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (!signed) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/contexts/AuthContext.jsx
+// Descrição: Contexto para gerenciar a autenticação em toda a aplicação.
+// -----------------------------------------------------------------------------
+import { createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
+
+export const AuthContext = createContext({});
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function loadStorageData() {
+      const storageUser = localStorage.getItem('@LHB:user');
+      const storageToken = localStorage.getItem('@LHB:token');
+
+      if (storageUser && storageToken) {
+        api.defaults.headers.authorization = `Bearer ${storageToken}`;
+        setUser(JSON.parse(storageUser));
+      }
+      setLoading(false);
+    }
+    loadStorageData();
+  }, []);
+
+  async function signIn({ email, password }) {
+    try {
+      const response = await api.post('/sessions', { email, password });
+      const { user, token } = response.data;
+
+      localStorage.setItem('@LHB:user', JSON.stringify(user));
+      localStorage.setItem('@LHB:token', token);
+
+      api.defaults.headers.authorization = `Bearer ${token}`;
+      setUser(user);
+      navigate('/dashboard');
+      toast.success(`Bem-vindo, ${user.name}!`);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Erro ao fazer login.');
+    }
+  }
+
+  async function signUp({ name, email, password }) {
+    try {
+      await api.post('/users', { name, email, password, role: 'Cidadão' });
+      toast.success('Cadastro realizado com sucesso! Faça o login.');
+      navigate('/');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Erro ao se cadastrar.');
+    }
+  }
+
+  function signOut() {
+    localStorage.removeItem('@LHB:user');
+    localStorage.removeItem('@LHB:token');
+    setUser(null);
+    navigate('/');
+    toast('Desconectado.');
+  }
+
+  return (
+    <AuthContext.Provider value={{ signed: !!user, user, loading, signIn, signUp, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/services/api.js
+// Descrição: Configuração do Axios para comunicação com o backend.
+// -----------------------------------------------------------------------------
+import axios from 'axios';
+
+export const api = axios.create({
+  baseURL: 'http://localhost:3333', // Endereço do seu backend
+});
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/pages/Login.jsx
+// -----------------------------------------------------------------------------
+import { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
+import { FaTerminal } from 'react-icons/fa';
+
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { signIn } = useContext(AuthContext);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!email || !password) {
+      // toast.error('Preencha todos os campos.');
+      return;
+    }
+    signIn({ email, password });
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-preto-abissal">
+      <div className="w-full max-w-md p-8 space-y-6 border border-ciano-eletrico/30 shadow-lg shadow-ciano-eletrico/10">
+        <div className="text-center">
+            <FaTerminal className="mx-auto h-12 w-12 text-ciano-eletrico" />
+            <h1 className="font-exo text-4xl text-ciano-eletrico text-shadow-glow mt-4">Legion Hacker BR</h1>
+            <p className="mt-2 text-sm text-branco-texto/70">Acessar Plataforma de Operações</p>
+        </div>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm font-medium text-ciano-eletrico">Email</label>
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full bg-preto-abissal/50 border border-ciano-eletrico/50 focus:ring-ciano-eletrico focus:border-ciano-eletrico p-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ciano-eletrico">Senha</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full bg-preto-abissal/50 border border-ciano-eletrico/50 focus:ring-ciano-eletrico focus:border-ciano-eletrico p-2"
+            />
+          </div>
+          <button type="submit" className="w-full py-2 px-4 border border-transparent text-sm font-medium text-preto-abissal bg-ciano-eletrico hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ciano-eletrico transition duration-300">
+            [ Conectar ]
+          </button>
+        </form>
+        <p className="text-center text-sm">
+            Não tem uma conta? <Link to="/register" className="text-verde-limao hover:underline">Crie um acesso</Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/pages/Register.jsx
+// -----------------------------------------------------------------------------
+import { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
+import { FaUserPlus } from 'react-icons/fa';
+
+export default function Register() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const { signUp } = useContext(AuthContext);
+
+    function handleSubmit(e) {
+        e.preventDefault();
+        if(!name || !email || !password) return;
+        signUp({ name, email, password });
+    }
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-preto-abissal">
+          <div className="w-full max-w-md p-8 space-y-6 border border-verde-limao/30 shadow-lg shadow-verde-limao/10">
+            <div className="text-center">
+                <FaUserPlus className="mx-auto h-12 w-12 text-verde-limao" />
+                <h1 className="font-exo text-3xl text-verde-limao mt-4">Criar Acesso Seguro</h1>
+                <p className="mt-2 text-sm text-branco-texto/70">Junte-se à defesa digital.</p>
+            </div>
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-verde-limao">Nome</label>
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 block w-full bg-preto-abissal/50 border border-verde-limao/50 focus:ring-verde-limao focus:border-verde-limao p-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-verde-limao">Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 block w-full bg-preto-abissal/50 border border-verde-limao/50 focus:ring-verde-limao focus:border-verde-limao p-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-verde-limao">Senha</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 block w-full bg-preto-abissal/50 border border-verde-limao/50 focus:ring-verde-limao focus:border-verde-limao p-2" />
+              </div>
+              <button type="submit" className="w-full py-2 px-4 border border-transparent text-sm font-medium text-preto-abissal bg-verde-limao hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-verde-limao transition duration-300">
+                [ Registrar ]
+              </button>
+            </form>
+            <p className="text-center text-sm">
+                Já possui acesso? <Link to="/" className="text-ciano-eletrico hover:underline">Faça o login</Link>
+            </p>
+          </div>
+        </div>
+      );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/pages/Dashboard.jsx
+// -----------------------------------------------------------------------------
+import { useState, useContext, useEffect } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
+import { FaSignOutAlt, FaPlus } from 'react-icons/fa';
+
+import TicketList from '../components/TicketList';
+import NewTicketModal from '../components/NewTicketModal';
+import ChatModal from '../components/ChatModal';
+
+export default function Dashboard() {
+  const { user, signOut } = useContext(AuthContext);
+  const [tickets, setTickets] = useState([]);
+  const [isNewTicketModalOpen, setNewTicketModalOpen] = useState(false);
+  const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+
+  async function loadTickets() {
+    try {
+      const response = await api.get('/tickets');
+      setTickets(response.data);
+    } catch (error) {
+      toast.error('Erro ao carregar chamados.');
+    }
+  }
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  function handleOpenChat(ticket) {
+    setSelectedTicket(ticket);
+    setChatModalOpen(true);
+  }
+
+  return (
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
+      <header className="flex justify-between items-center mb-8 pb-4 border-b border-ciano-eletrico/20">
+        <div>
+          <h1 className="font-exo text-3xl text-ciano-eletrico">Painel de Controle</h1>
+          <p className="text-branco-texto/70">Bem-vindo, {user.name}. Status: <span className="text-verde-limao">{user.role}</span></p>
+        </div>
+        <button onClick={signOut} className="flex items-center gap-2 px-4 py-2 border border-magenta-pulsante text-magenta-pulsante hover:bg-magenta-pulsante hover:text-preto-abissal transition-all">
+          <FaSignOutAlt/> Desconectar
+        </button>
+      </header>
+
+      <main>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-exo text-2xl text-verde-limao">Meus Chamados</h2>
+          {user.role === 'Cidadão' && (
+             <button onClick={() => setNewTicketModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-verde-limao text-preto-abissal font-bold hover:bg-opacity-80 transition-all">
+                <FaPlus/> Abrir Novo Chamado
+            </button>
+          )}
+        </div>
+        <TicketList tickets={tickets} onOpenChat={handleOpenChat} />
+      </main>
+
+      {isNewTicketModalOpen && (
+        <NewTicketModal 
+          isOpen={isNewTicketModalOpen} 
+          onClose={() => setNewTicketModalOpen(false)}
+          onTicketCreated={loadTickets}
+        />
+      )}
+
+      {isChatModalOpen && selectedTicket && (
+        <ChatModal
+          isOpen={isChatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          ticket={selectedTicket}
+        />
+      )}
+    </div>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/components/TicketList.jsx
+// -----------------------------------------------------------------------------
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+export default function TicketList({ tickets, onOpenChat }) {
+
+    const getStatusClass = (status) => {
+        switch(status) {
+            case 'Aberto': return 'bg-ciano-eletrico/20 text-ciano-eletrico';
+            case 'Em Análise': return 'bg-yellow-400/20 text-yellow-400';
+            case 'Resolvido': return 'bg-verde-limao/20 text-verde-limao';
+            case 'Fechado': return 'bg-magenta-pulsante/20 text-magenta-pulsante';
+            default: return 'bg-gray-500/20 text-gray-500';
+        }
+    }
+
+    if (tickets.length === 0) {
+        return <div className="text-center py-10 border border-dashed border-ciano-eletrico/20">Nenhum chamado encontrado.</div>
+    }
+
+  return (
+    <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+            <thead className="border-b border-ciano-eletrico/20">
+                <tr>
+                    <th className="p-4">ID</th>
+                    <th className="p-4">Título</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Criado em</th>
+                    <th className="p-4">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {tickets.map(ticket => (
+                    <tr key={ticket.id} className="border-b border-branco-texto/10 hover:bg-ciano-eletrico/5">
+                        <td className="p-4 text-magenta-pulsante">#{ticket.id}</td>
+                        <td className="p-4">{ticket.title}</td>
+                        <td className="p-4">
+                            <span className={`px-2 py-1 text-xs font-bold ${getStatusClass(ticket.status)}`}>
+                                {ticket.status}
+                            </span>
+                        </td>
+                        <td className="p-4 text-sm text-branco-texto/70">
+                            {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true, locale: ptBR })}
+                        </td>
+                        <td className="p-4">
+                            <button onClick={() => onOpenChat(ticket)} className="px-3 py-1 bg-ciano-eletrico text-preto-abissal text-sm font-bold">
+                                Ver Chat
+                            </button>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/components/NewTicketModal.jsx
+// -----------------------------------------------------------------------------
+import { useState, useContext } from 'react';
+import { api } from '../services/api';
+import toast from 'react-hot-toast';
+import { FaTimes } from 'react-icons/fa';
+
+export default function NewTicketModal({ isOpen, onClose, onTicketCreated }) {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        if(!title || !description) {
+            toast.error('Título e descrição são obrigatórios.');
+            return;
+        }
+        try {
+            await api.post('/tickets', { title, description });
+            toast.success('Chamado aberto com sucesso!');
+            onTicketCreated(); // Recarrega a lista de tickets
+            onClose(); // Fecha o modal
+        } catch (error) {
+            toast.error('Erro ao abrir chamado.');
+        }
+    }
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-preto-abissal border border-verde-limao/50 p-8 w-full max-w-2xl relative shadow-lg shadow-verde-limao/20">
+        <button onClick={onClose} className="absolute top-4 right-4 text-branco-texto hover:text-magenta-pulsante">
+            <FaTimes size={20}/>
+        </button>
+        <h2 className="font-exo text-2xl text-verde-limao mb-6">Abrir Novo Chamado de Ajuda</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-verde-limao">Título</label>
+                <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full bg-preto-abissal/50 border border-verde-limao/50 p-2"/>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-verde-limao">Descrição do Problema</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} rows="5" className="mt-1 block w-full bg-preto-abissal/50 border border-verde-limao/50 p-2"></textarea>
+            </div>
+            <div className="flex justify-end gap-4 pt-4">
+                <button type="button" onClick={onClose} className="px-4 py-2 border border-branco-texto/50 text-branco-texto">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-verde-limao text-preto-abissal font-bold">Enviar Chamado</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+// -----------------------------------------------------------------------------
+// ARQUIVO: src/components/ChatModal.jsx
+// -----------------------------------------------------------------------------
+import { useState, useEffect, useRef, useContext } from 'react';
+import { io } from 'socket.io-client';
+import { api } from '../services/api';
+import { AuthContext } from '../contexts/AuthContext';
+import { FaTimes, FaPaperPlane } from 'react-icons/fa';
+import { format } from 'date-fns';
+
+const socket = io('http://localhost:3333');
+
+export default function ChatModal({ isOpen, onClose, ticket }) {
+    const { user } = useContext(AuthContext);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const chatBodyRef = useRef(null);
+
+    useEffect(() => {
+        // Busca o histórico de mensagens ao abrir o modal
+        async function fetchMessages() {
+            const response = await api.get(`/tickets/${ticket.id}/messages`);
+            setMessages(response.data);
+        }
+        fetchMessages();
+
+        // Conecta ao socket
+        socket.emit('join_ticket_room', ticket.id);
+        socket.on('receive_message', (message) => {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        });
+
+        // Limpeza ao desmontar
+        return () => {
+            socket.off('receive_message');
+        };
+    }, [ticket.id]);
+
+    useEffect(() => {
+        // Auto-scroll para a última mensagem
+        if(chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    function handleSendMessage(e) {
+        e.preventDefault();
+        if(newMessage.trim() === '') return;
+
+        const messageData = {
+            ticketId: ticket.id,
+            senderId: user.id,
+            content: newMessage,
+        };
+        socket.emit('send_message', messageData);
+        setNewMessage('');
+    }
+
+    if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="bg-preto-abissal border border-ciano-eletrico/50 w-full max-w-3xl h-[80vh] flex flex-col shadow-lg shadow-ciano-eletrico/20">
+            <header className="p-4 border-b border-ciano-eletrico/20 flex justify-between items-center">
+                <h2 className="font-exo text-xl text-ciano-eletrico">Chat: Chamado #{ticket.id} - {ticket.title}</h2>
+                <button onClick={onClose} className="text-branco-texto hover:text-magenta-pulsante">
+                    <FaTimes size={20}/>
+                </button>
+            </header>
+            
+            <main ref={chatBodyRef} className="flex-1 p-4 overflow-y-auto space-y-4">
+                {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.sender.id === user.id ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-lg p-3 ${msg.sender.id === user.id ? 'bg-ciano-eletrico/20' : 'bg-branco-texto/10'}`}>
+                            <p className="font-bold text-sm text-verde-limao">{msg.sender.name} <span className="text-xs text-branco-texto/50">({msg.sender.role})</span></p>
+                            <p className="text-branco-texto">{msg.content}</p>
+                            <p className="text-right text-xs text-branco-texto/40 mt-1">{format(new Date(msg.createdAt), "HH:mm")}</p>
+                        </div>
+                    </div>
+                ))}
+            </main>
+
+            <footer className="p-4 border-t border-ciano-eletrico/20">
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                    <input 
+                        type="text"
+                        value={newMessage}
+                        onChange={e => setNewMessage(e.target.value)}
+                        placeholder="Digite sua mensagem..."
+                        className="flex-1 bg-preto-abissal/50 border border-ciano-eletrico/50 p-2"
+                    />
+                    <button type="submit" className="px-4 py-2 bg-ciano-eletrico text-preto-abissal">
+                        <FaPaperPlane/>
+                    </button>
+                </form>
+            </footer>
+        </div>
+    </div>
+  );
+}

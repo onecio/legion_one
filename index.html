@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legion Hacker BR: Guardiões das Fronteiras Digitais do Brasil</title>
+    
+    <!-- Google Fonts for futuristic typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00e5ff; /* Electric Blue */
+            --secondary-color: #ad53ff; /* Deep Purple */
+            --accent-color: #00ff8a; /* Lime Green */
+            --danger-color: #ff4d4d; /* Alert Red */
+            --dark-bg: #030014;
+            --text-color: #e0e0e0;
+            --glass-bg: rgba(10, 20, 40, 0.6);
+            --border-color: rgba(0, 229, 255, 0.25);
+        }
+
+        /* --- General Body and Scrollbar Styling --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 300;
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+
+        /* --- Background Canvas --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        /* --- Typography --- */
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 8px var(--primary-color), 0 0 12px rgba(0, 229, 255, 0.5);
+        }
+
+        /* --- Main Structure --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .section-title {
+            font-size: 2.8rem;
+            margin-bottom: 50px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        
+        /* --- Glassmorphism Card Effect --- */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
+        }
+        
+        /* --- Hero Section --- */
+        #hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #hero .container {
+            padding: 0;
+        }
+
+        #hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            color: #fff;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        #hero p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            max-width: 800px;
+            margin: 0 auto 30px;
+            color: var(--text-color);
+        }
+        
+        /* --- Section: Core Principles (Mission, Vision, Values) --- */
+        .principles-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .principles-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .principle-card {
+            padding: 25px;
+        }
+        
+        .principle-card h3 {
+            color: var(--accent-color);
+            text-shadow: 0 0 6px var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .principle-card ul {
+            list-style: none;
+            padding-left: 0;
+            text-align: left;
+        }
+        
+        .principle-card ul li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .principle-card ul li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        /* --- Section: The Reality We Face --- */
+        #the-threat .section-title {
+            color: var(--danger-color);
+            text-shadow: 0 0 8px var(--danger-color);
+        }
+
+        #the-threat .glass-card {
+            text-align: center;
+            font-size: 1.1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            border-color: rgba(255, 77, 77, 0.4);
+        }
+
+        /* --- Section: Initiatives --- */
+        #initiatives .intro-text {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            text-align: center;
+        }
+
+        .initiatives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .initiative-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .initiative-card .icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            filter: drop-shadow(0 0 5px var(--accent-color));
+        }
+
+        .initiative-card h3 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-shadow: none;
+        }
+        
+        .initiative-card p {
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+
+        /* --- Benefits Section --- */
+        #benefits .glass-card ul {
+             list-style: none;
+             columns: 2;
+             -webkit-columns: 2;
+             -moz-columns: 2;
+             gap: 20px;
+        }
+        @media (max-width: 768px) {
+            #benefits .glass-card ul {
+                columns: 1;
+                -webkit-columns: 1;
+                -moz-columns: 1;
+            }
+        }
+         #benefits .glass-card ul li {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+        #benefits .glass-card ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        /* --- Section: Call to Action --- */
+        #cta {
+            text-align: center;
+        }
+        
+        #cta .quote {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            background: rgba(0, 229, 255, 0.05);
+        }
+        
+        #cta h2 {
+            font-size: 3rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        #cta p {
+            max-width: 700px;
+            margin: 20px auto 40px;
+            font-size: 1.1rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 255, 138, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background-color: #00ff8a;
+            box-shadow: 0 0 30px rgba(0, 255, 138, 0.8);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--primary-color);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            color: #888;
+        }
+        
+        /* --- Scroll Animations --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .container { padding: 60px 0; }
+            .section-title { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- ========= HERO SECTION ========= -->
+    <section id="hero">
+        <div class="container">
+            <div class="content reveal">
+                <h1>🌐 Legion Hacker BR</h1>
+                <p>Em um mundo conectado, onde fronteiras físicas se dissolvem, surge a necessidade urgente da proteção da soberania digital e da dignidade humana no ciberespaço. O projeto Legion Hacker BR nasce como uma iniciativa social, tecnológica e educativa voltada à defesa dos vulneráveis e à segurança do Estado no ambiente digital.</p>
+                <a href="#core-principles" class="btn btn-primary">Entenda a Missão</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========= CORE PRINCIPLES SECTION ========= -->
+    <section id="core-principles" class="container">
+        <div class="reveal">
+            <div class="principles-grid">
+                <div class="principle-card glass-card">
+                    <h3>🎯 Missão</h3>
+                    <p>Proteger, conscientizar e empoderar a sociedade brasileira — especialmente crianças, idosos e pessoas em situação de vulnerabilidade digital — contra os riscos cada vez mais frequentes de fraudes, abusos e crimes cibernéticos.</p>
+                </div>
+                <div class="principle-card glass-card">
+                    <h3>👁️ Visão</h3>
+                    <p>Ser referência nacional em ciberdefesa humanitária, atuando como um verdadeiro escudo digital coletivo, fortalecendo a soberania brasileira e criando uma cultura de cidadania e responsabilidade no mundo virtual.</p>
+                </div>
+                <div class="principle-card glass-card">
+                    <h3>💡 Valores</h3>
+                    <ul>
+                        <li>Ética Hacker para transformação social.</li>
+                        <li>Proteção total aos vulneráveis.</li>
+                        <li>Educação Digital como o melhor antivírus.</li>
+                        <li>Solidariedade Cibernética.</li>
+                        <li>Transparência e Legalidade.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ========= THE THREAT SECTION ========= -->
+    <section id="the-threat" class="container">
+        <div class="reveal">
+            <h2 class="section-title">// A Realidade Que Enfrentamos</h2>
+            <div class="glass-card">
+                <p>O universo digital esconde ameaças invisíveis. Crianças expostas a aliciamentos, idosos vítimas de golpes financeiros, pessoas fragilizadas sendo manipuladas, e até perdas de vidas relacionadas a abusos e extorsões digitais. Não é ficção. É a realidade diária de milhares de famílias brasileiras.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ========= INITIATIVES SECTION ========= -->
+    <section id="initiatives" class="container">
+        <div class="reveal">
+            <h2 class="section-title">// Objetivos e Ações Estratégicas</h2>
+            <p class="intro-text">Para combater as ameaças digitais, monitoramos e investigamos riscos, prestamos apoio direto às vítimas, educamos comunidades, desenvolvemos tecnologias de proteção e catalisamos políticas públicas para uma segurança digital inclusiva.</p>
+            <div class="initiatives-grid">
+                <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    <h3>Recuperação de PIX</h3>
+                    <p>Auxílio especializado a idosos vítimas de golpes, utilizando expertise técnica para rastrear e recuperar valores perdidos.</p>
+                </div>
+                <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    <h3>Suporte a PMEs</h3>
+                    <p>Consultoria e soluções de segurança acessíveis para proteger negócios emergentes e fortalecer a economia local.</p>
+                </div>
+                <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18" /></svg>
+                    <h3>Educação Digital</h3>
+                    <p>Desenvolvimento de cursos para capacitar comunidades e indivíduos em situação de vulnerabilidade digital.</p>
+                </div>
+                <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <h3>Monitoramento 24/7</h3>
+                    <p>Equipe dedicada que monitora o ciberespaço brasileiro, identificando e neutralizando ameaças em tempo real.</p>
+                </div>
+                <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    <h3>Ativismo Positivo</h3>
+                    <p>Promoção de campanhas de conscientização para construir uma cultura digital mais ética, segura e responsável.</p>
+                </div>
+                <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 14l9-5-9-5-9 5 9 5z" /><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg>
+                    <h3>Formação de Hackers do Bem</h3>
+                    <p>Capacitação de talentos em cibersegurança, transformando-os em agentes de mudança e defensores da internet.</p>
+                </div>
+                 <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    <h3>P&D em Segurança</h3>
+                    <p>Investimento em pesquisa e desenvolvimento de soluções inovadoras para antecipar e combater as ameaças do futuro.</p>
+                </div>
+                 <div class="initiative-card glass-card">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    <h3>Parcerias Estratégicas</h3>
+                    <p>Colaboração com instituições para fortalecer a segurança digital em nível nacional de forma colaborativa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========= BENEFITS SECTION ========= -->
+    <section id="benefits" class="container">
+        <div class="reveal">
+            <h2 class="section-title">// Benefícios à Sociedade</h2>
+            <div class="glass-card">
+                <ul>
+                    <li>Redução de danos por golpes digitais.</li>
+                    <li>Reintegração social e financeira de vítimas.</li>
+                    <li>Prevenção de tragédias envolvendo vulneráveis.</li>
+                    <li>Estímulo à cultura de segurança digital.</li>
+                    <li>Apoio a órgãos públicos e comunidades.</li>
+                    <li>Fortalecimento da resiliência nacional.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========= WHY IT MATTERS SECTION ========= -->
+    <section id="why-it-matters" class="container">
+        <div class="reveal">
+            <h2 class="section-title">// Por Que Isso Importa?</h2>
+            <div class="glass-card">
+                <p>Vivemos em um mundo sem fronteiras, onde o ciberespaço é desigual e cruel com quem não tem defesa. O Legion Hacker BR se posiciona como um "remédio social" moderno — uma resposta solidária, estratégica e tecnológica à crescente epidemia de abusos e vulnerabilidades digitais no Brasil.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ========= CALL TO ACTION SECTION ========= -->
+    <section id="cta" class="container">
+        <div class="reveal">
+            <div class="quote">"Proteger vidas no mundo digital é tão importante quanto protegê-las no mundo físico."</div>
+            <h2>Junte-se aos Guardiões</h2>
+            <p>A defesa das fronteiras digitais do Brasil é uma missão coletiva. Convidamos hackers do bem, educadores, profissionais e cidadãos preocupados a se unirem a nós. Seu conhecimento e compromisso são essenciais para construirmos um futuro digital seguro.</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn btn-primary">Quero Fazer Parte</a>
+                <a href="#" class="btn btn-secondary">Saber Mais</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========= FOOTER ========= -->
+    <footer>
+        <p>&copy; 2024 Legion Hacker BR. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        // --- Particle Animation Script ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray;
+
+        const mouse = {
+            x: null,
+            y: null,
+            radius: (canvas.height / 120) * (canvas.width / 120)
+        }
+
+        window.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = 'rgba(0, 229, 255, 0.5)';
+                ctx.fill();
+            }
+
+            update() {
+                if (this.x > canvas.width || this.x < 0) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < mouse.radius + this.size) {
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) { this.x += 3; }
+                    if (mouse.x > this.x && this.x > this.size * 10) { this.x -= 3; }
+                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) { this.y += 3; }
+                    if (mouse.y > this.y && this.y > this.size * 10) { this.y -= 3; }
+                }
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 0.4) - 0.2;
+                let directionY = (Math.random() * 0.4) - 0.2;
+                let color = '#00e5ff';
+
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = `rgba(0, 229, 255, ${opacityValue})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('resize', function() {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            mouse.radius = ((canvas.height / 120) * (canvas.height / 120));
+            init();
+        });
+
+        window.addEventListener('mouseout', function() {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        init();
+        animate();
+
+
+        // --- Scroll Reveal Animation ---
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        revealElements.forEach(el => {
+            revealObserver.observe(el);
+        });
+
+    </script>
+</body>
+</html>
